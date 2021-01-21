@@ -7,10 +7,9 @@ server.listen()
 
 clients = []
 nicknames = []
-jogadores = []
 palavra = ""
 display = ""
-tentativas = 5
+chances = 6
 
 def broadcast(message):
     for client in clients:
@@ -26,41 +25,78 @@ def remover(message, client):
     nicknames.remove(nickname)
     return
 
-def forca():
-    jogadores[0].send("Escolha a palavra para a forca:")
-    palavra = jogadores[0].recv(1024).decode()
+def iniciar_forca(client, nickname):
+    global palavra
+    global display
+    client.send("Escolha a palavra para a forca:".encode())
+    print(nickname)
+    palavra = client.recv(1024).decode().lower()
+    print(palavra)
+    palavra = palavra.replace(nickname+": ", "")
+    print(palavra)
     for i in palavra:
         display.append("_")
-    jogadores[0:1].send("_____\n|    |\n|    0\n|   /|\\n|   / \\n|\n|_")
+    #broadcast("_____\n|    |\n|    0\n|   /|\\n|   / \\n|\n|_".encode())
+    #broadcast(display.encode())
+    print("aeeeeeeeee")
+
+def adivinhar(client):
+    global palavra, display
+    client.send("-Digite a letra desejada: ".encode())
+    existe = 0
+    while True:
+        tentativa = client.recv(1024).decode()
+        if len(tentativa) == 1:
+            break
+        else:
+            client.send("-".encode())
+    for i in range(len(palavra)):
+        if palavra[i] == tentativa:
+            existe = existe + 1
+            display[i] = tentativa
+    if existe == 0:
+        chances = chances - 1
+    if chances <= 0:
+        broadcast(f"As chances acabaram, a palavra era {palavra}".encode())
+        palavra = ""
+        display = ""
+        chances = 6
+    if palavra == display:
+        broadcast(f"A palavra foi adivinhada: {palavra}".encode())
+        palavra = ""
+        display = ""
+        chances = 6
+        
+
     pass
 
 def comandos(message, client, nickname):
-    print(message.decode())
-    if (message.decode().lower()).find(";;") != -1:
+    print(message.decode().lower())
+    if message.decode().lower() == (f"{nickname}: ;;help"):
+        client.send("\n-Os comandos existentes são:\n;;help para listar os comandos\n;;forca para o jogo da forca\n;;sair para sair\n".encode())
         
-        if (message.decode().lower()).find("help") != -1:
-            client.send("\n-Os comandos existentes são:\n-;;help para listar os comandos\n;;forca para o jogo da forca\n;;sair para sair\n".encode())
+    elif message.decode().lower() == (f"{nickname}: ;;sair"):
+        client.send("você será desconectado em instantes".encode())
+        client.send("qweirpuyaskdljfhqowieury128907346562087364lasdjkhfgeoirqwyfbv34296234592fbuefv3475".encode())
+        remover(message, client)
         
-        elif (message.decode().lower()).find("sair") != -1:
-            client.send("você será desconectado em instantes".encode())
-            client.send("qweirpuyaskdljfhqowieury128907346562087364lasdjkhfgeoirqwyfbv34296234592fbuefv3475".encode())
-            remover(message, client)
+    elif message.decode().lower() == (f"{nickname}: ;;forca"):
+        broadcast(f"{nickname} começou um jogo da forca para participar digite ;;participar\n".encode())
+        iniciar_forca(client, nickname)
         
-        elif(message.decode().lower()).find("forca") != -1:
-            broadcast(f"{nickname} começou um jogo da forca para participar digite ;;participar")
-            #threading.thread(target = forca, )
-            jogadores.append(client)
-        
-        elif(message.decode().lower()).find("participar") != -1:
-            if(jogadores.count() <= 2):
-                jogadores.append(client)
-                broadcast("Sala completa, jogo começando".encode())
-                forca()
-            else:
-                broadcast("Sala cheia, tente novamente mais tarde")
+    elif message.decode().lower() == (f"{nickname}: ;;adivinhar"):
+        broadcast(f"{nickname} começou um jogo da forca para participar digite ;;participar\n".encode())
+        adivinhar(client)
     else:
-        broadcast(message)
-    return
+        broadcast(message)  
+    """elif(message.decode().lower()).find("participar") != -1:
+        if(jogadores.count() <= 2):
+            jogadores.append(client)
+            broadcast("Sala completa, jogo começando".encode())
+                
+        else:
+            broadcast("Sala cheia, tente novamente mais tarde")"""
+
 
 
 def handle(client,nickname):
