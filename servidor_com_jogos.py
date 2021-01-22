@@ -9,7 +9,8 @@ clients = []
 nicknames = []
 palavra = ""
 display = ""
-chances = 6
+chances = 7
+letras = ""
 
 def broadcast(message):
     for client in clients:
@@ -26,36 +27,51 @@ def remover(message, client):
     return
 
 def iniciar_forca(client, nickname):
-    global palavra
-    global display
+    global palavra, display
     client.send("Escolha a palavra para a forca:".encode())
     print(nickname)
     palavra = client.recv(1024).decode().lower()
-    print(palavra)
     palavra = palavra.replace(nickname+": ", "")
     print(palavra)
     for i in palavra:
-        display.append("_")
-    #broadcast("_____\n|    |\n|    0\n|   /|\\n|   / \\n|\n|_".encode())
-    #broadcast(display.encode())
-    print("aeeeeeeeee")
+        display = display + "_"
+    print(display)
+    broadcast("______\n|    |\n|    \n|    \n|    \n|\n|_\n".encode())
+    broadcast(display.encode())
+
 
 def adivinhar(client):
-    global palavra, display
+    global palavra, display, letras, chances
     client.send("-Digite a letra desejada: ".encode())
     existe = 0
-    while True:
-        tentativa = client.recv(1024).decode()
-        if len(tentativa) == 1:
-            break
-        else:
-            client.send("-".encode())
+    tentativa = client.recv(1024).decode()
+
     for i in range(len(palavra)):
         if palavra[i] == tentativa:
             existe = existe + 1
             display[i] = tentativa
     if existe == 0:
         chances = chances - 1
+
+    if chances == 7:
+        broadcast("______\n|    |\n|    \n|    \n|   \n|\n|_".encode())
+    elif chances == 6:
+        broadcast("______\n|    |\n|    0\n|    \n|   \n|\n|_".encode())
+    elif chances == 5:
+        broadcast("______\n|    |\n|    0\n|    |\n|   \n|\n|_".encode())
+    elif chances == 4:
+        broadcast("______\n|    |\n|    0\n|   /|\n|   \n|\n|_".encode())
+    elif chances == 3:
+        broadcast("______\n|    |\n|    0\n|   /|\ \n|   n|\n|_".encode())
+    elif chances == 2:
+        broadcast("______\n|    |\n|    0\n|   /|\ \n|   / \n|\n|_".encode())
+    elif chances == 1:
+        broadcast("______\n|    |\n|    0\n|   /|\ \n|   / \ \n|\n|_".encode())
+    elif chances == 0:
+        broadcast("______\n|    |\n|  (X_X)\n|   /|\ \n|   / \ \n|\n|_".encode())
+
+    broadcast(f"Palavra: {display}, tentativas restantes: {chances}".encode())
+
     if chances <= 0:
         broadcast(f"As chances acabaram, a palavra era {palavra}".encode())
         palavra = ""
@@ -67,7 +83,6 @@ def adivinhar(client):
         display = ""
         chances = 6
         
-
     pass
 
 def comandos(message, client, nickname):
