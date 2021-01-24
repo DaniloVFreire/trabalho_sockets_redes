@@ -118,10 +118,6 @@ def comandos(message, client, nickname):
     elif message.decode().lower() == (f"{nickname}: ;;adivinhar"):
         adivinhar(client, nickname)
 
-    elif message.decode().lower() == (f"{nickname}: ;;jogodavelha"):
-        thread = threading.Thread(target=jogodavelha, args=(client, nickname))
-        thread.start()
-
     else:
         broadcast(message)  
     return
