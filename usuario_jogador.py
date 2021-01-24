@@ -9,7 +9,7 @@ client.connect(('127.0.0.1', 55555))
 
 
 
-def receive():
+def recebimento():
     client.send(nickname.encode())
     while True:
         try:
@@ -23,13 +23,13 @@ def receive():
             client.close()
             break
         
-def write():
+def escrever():
     while True:
         message = f'{nickname}: {input("")}'
         client.send(message.encode())
         
-receive_thread = threading.Thread(target=receive)
+receive_thread = threading.Thread(target=recebimento)
 receive_thread.start()
 
-write_thread = threading.Thread(target=write)
+write_thread = threading.Thread(target=escrever)
 write_thread.start()

@@ -11,12 +11,18 @@ palavra = ""
 display = ""
 chances = 7
 letras = ""
-jogadores = []
 
 def broadcast(message):
     for client in clients:
         client.send(message)
 
+
+def reiniciar_jogo_da_velha():
+    global palavra, display, letras, chances
+    palavra = ""
+    display = ""
+    chances = 7
+    letras = ""
 
 def remover(client):
     index = clients.index(client)
@@ -52,60 +58,56 @@ def adivinhar(client, nickname):
 
     tentativa = client.recv(1024).decode()
     tentativa = tentativa.replace(nickname+": ", "")
+    if palavra != '':
+        if len(tentativa) > 1:
+            broadcast("Não é permitida a adivinhação maior de um carctere".encode())
+            return
 
-    if len(tentativa) > 1:
-        broadcast("Não é permitida a adivinhação maior de um carctere".encode())
-        return
-    print("ASAFEWRFSDFGERGRHRTHTYJTJRTY------")
-    for i in range(len(palavra)):
-        if palavra[i] == tentativa:
-            existe = 1
-            aux = aux + palavra[i]
-        else:
-            aux = aux + display[i]
-    display = aux
-    letras = letras + tentativa + " "
+        for i in range(len(palavra)):
+            if palavra[i] == tentativa:
+                existe = 1
+                aux = aux + palavra[i]
+            else:
+                aux = aux + display[i]
+        display = aux
+        letras = letras + tentativa + " "
 
-    if existe == 0:
+        if existe == 0:
         chances = chances - 1
 
-    if chances == 7:
-        broadcast("______\n|    |\n|    \n|    \n|   \n|\n|_".encode())
-    elif chances == 6:
-        broadcast("______\n|    |\n|    0\n|    \n|   \n|\n|_".encode())
-    elif chances == 5:
-        broadcast("______\n|    |\n|    0\n|    |\n|   \n|\n|_".encode())
-    elif chances == 4:
-        broadcast("______\n|    |\n|    0\n|   /|\n|   \n|\n|_".encode())
-    elif chances == 3:
-        broadcast("______\n|    |\n|    0\n|   /|\ \n|   n|\n|_".encode())
-    elif chances == 2:
-        broadcast("______\n|    |\n|    0\n|   /|\ \n|   / \n|\n|_".encode())
-    elif chances == 1:
-        broadcast("______\n|    |\n|    0\n|   /|\ \n|   / \ \n|\n|_".encode())
-    elif chances == 0:
-        broadcast("______\n|    |\n|  (X_X)\n|   /|\ \n|   / \ \n|\n|_".encode())
+        if chances == 7:
+            broadcast("______\n|    |\n|    \n|    \n|   \n|\n|_".encode())
+        elif chances == 6:
+            broadcast("______\n|    |\n|    0\n|    \n|   \n|\n|_".encode())
+        elif chances == 5:
+            broadcast("______\n|    |\n|    0\n|    |\n|   \n|\n|_".encode())
+        elif chances == 4:
+            broadcast("______\n|    |\n|    0\n|   /|\n|   \n|\n|_".encode())
+        elif chances == 3:
+            broadcast("______\n|    |\n|    0\n|   /|\ \n|   n|\n|_".encode())
+        elif chances == 2:
+            broadcast("______\n|    |\n|    0\n|   /|\ \n|   / \n|\n|_".encode())
+        elif chances == 1:
+            broadcast("______\n|    |\n|    0\n|   /|\ \n|   / \ \n|\n|_".encode())
+        elif chances == 0:
+            broadcast("______\n|    |\n|  (X_X)\n|   /|\ \n|   / \ \n|\n|_".encode())
 
-    broadcast(f"Palavra: {display}\n tentativas restantes: {chances}\n letras tentadas{letras}".encode())
+        broadcast(f"Palavra: {display}\n tentativas restantes: {chances}\n letras tentadas{letras}".encode())
 
-    if chances <= 0:
-        broadcast(f"-As chances acabaram, a palavra era {palavra}".encode())
-        palavra = ""
-        display = ""
-        chances = 7
-        letras = ""
-    if palavra == display:
-        broadcast(f"-A palavra {palavra} foi adivinhada".encode())
-        palavra = ""
-        display = ""
-        chances = 7
-        letras = ""
-    return
+        if chances <= 0:
+            broadcast(f"-As chances acabaram, a palavra era {palavra}".encode())
+            reiniciar_jogo_da_velha()
+        if palavra == display:
+            broadcast(f"-A palavra {palavra} foi adivinhada".encode())
+            reiniciar_jogo_da_velha()
+    else:
+
+        return
 
 def comandos(message, client, nickname):
     print(message.decode().lower())
     if message.decode().lower() == (f"{nickname}: ;;help"):
-        client.send("\n-Os comandos existentes são:\n;;help para listar os comandos\n;;forca para o jogo da forca\n;;sair para sair\n".encode())
+        client.send("\n-Os comandos existentes são:\n;;help para listar os comandos\n;;forca para o jogo da forca\n;;sair para sair do chat\n".encode())
         
     elif message.decode().lower() == (f"{nickname}: ;;sair"):
         client.send("você será desconectado em instantes".encode())
@@ -130,6 +132,7 @@ def comunicacao(client, nickname):
         except:
             remover(client)
             break
+
 
 def conexao():
     while True:
