@@ -29,7 +29,6 @@ def reiniciar_jogo_da_velha():
 def remover(client):
     index = clients.index(client)
     clients.remove(client)
-    client.send("qweirpuyaskdljfhqowieury128907346562087364lasdjkhfgeoirqwyfbv34296234592fbuefv3475".encode())
     client.close()
     nickname = nicknames[index]
     print(f'{nickname} Saiu do chat!')

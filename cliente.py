@@ -14,9 +14,6 @@ def recebimento():
     while True:
         try:
             message = client.recv(1024).decode()
-            if message == "qweirpuyaskdljfhqowieury128907346562087364lasdjkhfgeoirqwyfbv34296234592fbuefv3475":
-                client.close()
-                break
             print(message)
         except:
             print("An error occurred!")
