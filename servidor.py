@@ -62,7 +62,7 @@ def adivinhar(client, nickname):
     tentativa = tentativa.replace(nickname+": ", "")
     if palavra != '':
         if len(tentativa) > 1:
-            broadcast("Não é permitida a adivinhação maior de um carctere".encode())
+            broadcast("Não é permitida a adivinhação maior que um carctere".encode())
             return
 
         for i in range(len(palavra)):
