@@ -11,20 +11,24 @@ palavra = ""
 display = ""
 chances = 7
 letras = ""
+jogadores = []
 
 def broadcast(message):
     for client in clients:
         client.send(message)
 
-def remover(message, client):
+
+def remover(client):
     index = clients.index(client)
     clients.remove(client)
+    client.send("qweirpuyaskdljfhqowieury128907346562087364lasdjkhfgeoirqwyfbv34296234592fbuefv3475".encode())
     client.close()
     nickname = nicknames[index]
     print(f'{nickname} left the chat!')
     broadcast(f'{nickname} left the chat!'.encode())
     nicknames.remove(nickname)
     return
+
 
 def iniciar_forca(client, nickname):
     global palavra, display
@@ -40,16 +44,28 @@ def iniciar_forca(client, nickname):
     broadcast(display.encode())
 
 
-def adivinhar(client):
+def adivinhar(client, nickname):
     global palavra, display, letras, chances
-    client.send("-Digite a letra desejada: ".encode())
     existe = 0
-    tentativa = client.recv(1024).decode()
+    aux = ""
+    client.send("-Digite a letra desejada: ".encode())
 
+    tentativa = client.recv(1024).decode()
+    tentativa = tentativa.replace(nickname+": ", "")
+
+    if len(tentativa) > 1:
+        broadcast("Não é permitida a adivinhação maior de um carctere".encode())
+        return
+    print("ASAFEWRFSDFGERGRHRTHTYJTJRTY------")
     for i in range(len(palavra)):
         if palavra[i] == tentativa:
-            existe = existe + 1
-            display[i] = tentativa
+            existe = 1
+            aux = aux + palavra[i]
+        else:
+            aux = aux + display[i]
+    display = aux
+    letras = letras + tentativa + " "
+
     if existe == 0:
         chances = chances - 1
 
@@ -70,20 +86,21 @@ def adivinhar(client):
     elif chances == 0:
         broadcast("______\n|    |\n|  (X_X)\n|   /|\ \n|   / \ \n|\n|_".encode())
 
-    broadcast(f"Palavra: {display}, tentativas restantes: {chances}".encode())
+    broadcast(f"Palavra: {display}\n tentativas restantes: {chances}\n letras tentadas{letras}".encode())
 
     if chances <= 0:
-        broadcast(f"As chances acabaram, a palavra era {palavra}".encode())
+        broadcast(f"-As chances acabaram, a palavra era {palavra}".encode())
         palavra = ""
         display = ""
-        chances = 6
+        chances = 7
+        letras = ""
     if palavra == display:
-        broadcast(f"A palavra foi adivinhada: {palavra}".encode())
+        broadcast(f"-A palavra {palavra} foi adivinhada".encode())
         palavra = ""
         display = ""
-        chances = 6
-        
-    pass
+        chances = 7
+        letras = ""
+    return
 
 def comandos(message, client, nickname):
     print(message.decode().lower())
@@ -92,38 +109,33 @@ def comandos(message, client, nickname):
         
     elif message.decode().lower() == (f"{nickname}: ;;sair"):
         client.send("você será desconectado em instantes".encode())
-        client.send("qweirpuyaskdljfhqowieury128907346562087364lasdjkhfgeoirqwyfbv34296234592fbuefv3475".encode())
-        remover(message, client)
+        remover(client)
         
     elif message.decode().lower() == (f"{nickname}: ;;forca"):
-        broadcast(f"{nickname} começou um jogo da forca para participar digite ;;participar\n".encode())
+        broadcast(f"{nickname} começou um jogo da forca para adivinhar uma letra da palavra digite ;;adivinhar\n".encode())
         iniciar_forca(client, nickname)
         
     elif message.decode().lower() == (f"{nickname}: ;;adivinhar"):
-        broadcast(f"{nickname} começou um jogo da forca para participar digite ;;participar\n".encode())
-        adivinhar(client)
+        adivinhar(client, nickname)
+
+    elif message.decode().lower() == (f"{nickname}: ;;jogodavelha"):
+        thread = threading.Thread(target=jogodavelha, args=(client, nickname))
+        thread.start()
+
     else:
         broadcast(message)  
-    """elif(message.decode().lower()).find("participar") != -1:
-        if(jogadores.count() <= 2):
-            jogadores.append(client)
-            broadcast("Sala completa, jogo começando".encode())
-                
-        else:
-            broadcast("Sala cheia, tente novamente mais tarde")"""
+    return
 
-
-
-def handle(client,nickname):
+def comunicacao(client, nickname):
     while True:
         try:
             message = client.recv(1024)
             comandos(message, client, nickname)
         except:
-            remover(message, client)
+            remover(client)
             break
 
-def receive():
+def conexao():
     while True:
         client, address = server.accept()
         print(f"Uma conexão foi estabelecida com {str(address)}")
@@ -136,8 +148,8 @@ def receive():
         broadcast(f'{nickname} entrou no chat!'.encode())
         client.send(f'\n\n-Bem vindo ao chat {nickname}, o chat consiste em comandos de minigame,funcionalidades e troca de mensagens,\n-para receber os possíveis comandos digite ;;help\n'.encode())
         
-        thread = threading.Thread(target=handle, args=(client,nickname))
+        thread = threading.Thread(target=comunicacao, args=(client,nickname))
         thread.start()
     
 print("O servidor está ligado")
-receive()
+conexao()
