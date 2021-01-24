@@ -6,12 +6,15 @@
 ## Comandos:
 - ;;help
 |---------------|----------|----------|
+
 Comando de ajuda ao usuário.
 
 - ;;forca
 |---------------|----------|----------|
+
 Comando para jogar o jogo da forca.
 
 - ;;sair
 |---------------|----------|----------|
+
 Comando para sair do chat.
