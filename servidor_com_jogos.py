@@ -12,6 +12,7 @@ display = ""
 chances = 7
 letras = ""
 
+
 def broadcast(message):
     for client in clients:
         client.send(message)
@@ -24,14 +25,15 @@ def reiniciar_jogo_da_velha():
     chances = 7
     letras = ""
 
+
 def remover(client):
     index = clients.index(client)
     clients.remove(client)
     client.send("qweirpuyaskdljfhqowieury128907346562087364lasdjkhfgeoirqwyfbv34296234592fbuefv3475".encode())
     client.close()
     nickname = nicknames[index]
-    print(f'{nickname} left the chat!')
-    broadcast(f'{nickname} left the chat!'.encode())
+    print(f'{nickname} Saiu do chat!')
+    broadcast(f'{nickname} saiu do chat!'.encode())
     nicknames.remove(nickname)
     return
 
@@ -73,7 +75,7 @@ def adivinhar(client, nickname):
         letras = letras + tentativa + " "
 
         if existe == 0:
-        chances = chances - 1
+            chances = chances - 1
 
         if chances == 7:
             broadcast("______\n|    |\n|    \n|    \n|   \n|\n|_".encode())
@@ -92,7 +94,7 @@ def adivinhar(client, nickname):
         elif chances == 0:
             broadcast("______\n|    |\n|  (X_X)\n|   /|\ \n|   / \ \n|\n|_".encode())
 
-        broadcast(f"Palavra: {display}\n tentativas restantes: {chances}\n letras tentadas{letras}".encode())
+        broadcast(f"Palavra: {display}\n tentativas restantes: {chances}\n letras tentadas {letras}".encode())
 
         if chances <= 0:
             broadcast(f"-As chances acabaram, a palavra era {palavra}".encode())
@@ -103,6 +105,7 @@ def adivinhar(client, nickname):
     else:
 
         return
+
 
 def comandos(message, client, nickname):
     print(message.decode().lower())
@@ -123,6 +126,7 @@ def comandos(message, client, nickname):
     else:
         broadcast(message)  
     return
+
 
 def comunicacao(client, nickname):
     while True:
@@ -147,8 +151,9 @@ def conexao():
         broadcast(f'{nickname} entrou no chat!'.encode())
         client.send(f'\n\n-Bem vindo ao chat {nickname}, o chat consiste em comandos de minigame,funcionalidades e troca de mensagens,\n-para receber os possíveis comandos digite ;;help\n'.encode())
         
-        thread = threading.Thread(target=comunicacao, args=(client,nickname))
+        thread = threading.Thread(target=comunicacao, args=(client, nickname))
         thread.start()
-    
+
+
 print("O servidor está ligado")
 conexao()
